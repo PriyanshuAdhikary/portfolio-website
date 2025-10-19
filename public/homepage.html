@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Priyanshu Adhikary | Portfolio</title>
+    <link rel="icon" type="image/png" href="logo.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <script type="module" src="https://unpkg.com/@splinetool/viewer@1.10.82/build/spline-viewer.js" async></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    
+    <style>
+        /* Base Styles from Original Site */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a;
+            color: #f1f5f9;
+            overflow-x: hidden;
+            selection:bg-neutral-700 selection:text-neutral-50;
+        }
+        .font-geist { font-family: 'Geist', sans-serif !important; }
+        .font-playfair { font-family: 'Playfair Display', serif !important; }
+
+        .spotlight {
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 50%);
+            pointer-events: none;
+            position: absolute;
+        }
+        .gradient-text {
+            background: linear-gradient(to bottom, #f1f5f9, #94a3b8);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; text-fill-color: transparent;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
+        @keyframes text-focus-in { 0% { filter: blur(12px); opacity: 0; } 100% { filter: blur(0px); opacity: 1; } }
+        .animate-text-focus-in { animation: text-focus-in 1s cubic-bezier(0.550, 0.085, 0.680, 0.530) both; }
+        .delay-1 { animation-delay: 0.5s; }
+        .delay-2 { animation-delay: 1s; }
+        @keyframes heroSlideInLeft { 0% { opacity: 0; transform: translateX(-60px); } 100% { opacity: 1; transform: translateX(0); } }
+        @keyframes heroSlideInRight { 0% { opacity: 0; transform: translateX(60px); } 100% { opacity: 1; transform: translateX(0); } }
+        #about-left-panel, #about-right-panel { opacity: 0; transition: opacity 1s, transform 1s; }
+        .start-animation #about-left-panel { animation: heroSlideInLeft 1.1s cubic-bezier(0.4,0,0.2,1) 0.5s forwards; }
+        .start-animation #about-right-panel { animation: heroSlideInRight 1.1s cubic-bezier(0.4,0,0.2,1) 0.8s forwards; }
+        #matter-canvas-left { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+        #about-right-panel { position: relative; overflow: hidden; }
+        .hidden-vibe-container { position: absolute; inset: 0; z-index: 0; -webkit-mask-image: radial-gradient(circle 350px at var(--x, -1000px) var(--y, -1000px), black 60%, transparent 80%); mask-image: radial-gradient(circle 350px at var(--x, -1000px) var(--y, -1000px), black 60%, transparent 80%); }
+        .hidden-vibe { position: absolute; color: rgba(255,255,255,0.4); font-family: monospace; font-size: 14px; white-space: nowrap; }
+        .fake-switch { position: absolute; display: flex; align-items: center; gap: 10px; }
+        .switch-track { width: 36px; height: 20px; background-color: rgba(255, 255, 255, 0.1); border-radius: 10px; position: relative; border: 1px solid rgba(255, 255, 255, 0.15); }
+        .switch-handle { position: absolute; width: 14px; height: 14px; background-color: rgba(255, 255, 255, 0.5); border-radius: 50%; top: 2px; transition: transform 0.2s; }
+        .switch-on .switch-handle { transform: translateX(16px); background-color: #34d399; }
+        .switch-off .switch-handle { transform: translateX(2px); }
+
+        /* New Animation Styles from Example */
+        .fade-in-up { opacity: 0; transform: translateY(50px); transition: opacity 0.8s ease-out, transform 0.8s ease-out; }
+        .fade-in-up.visible { opacity: 1; transform: translateY(0); }
+        .fade-in { opacity: 0; transition: opacity 0.8s ease-out; }
+        .fade-in.visible { opacity: 1; }
+        .stagger-delay-1 { transition-delay: 0.1s; }
+        .stagger-delay-2 { transition-delay: 0.2s; }
+        .stagger-delay-3 { transition-delay: 0.3s; }
+
+        /* Styles for the new About Me hero section */
+        .about-me-hero-bg {
+            background-size: cover;
+            background-position: center 20%;
+            background-repeat: no-repeat;
+            position: relative;
+        }
+        .about-me-hero-bg::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(0,0,0,0.6) 30%, rgba(0,0,0,0) 70%);
+            z-index: 1;
+        }
+        .about-me-hero-content {
+            position: relative;
+            z-index: 3; /* Above gradient overlays */
+        }
+
+        #about-me-hero {
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out; 
+        }
+
+        #about-me-hero.is-visible {
+            opacity: 1;
+        }
+        
+        /* Glass morphism effect */
+        .glass-morphism-section {
+            background-color: rgba(10, 10, 10, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        
+        .project-card-inner, .research-card-inner {
+            background-color: transparent !important;
+        }
+        
+        .skill-card, .contact-form-bg {
+            background-color: rgba(25, 25, 25, 0.6);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+        .form-input-bg {
+            background-color: rgba(35, 35, 35, 0.6);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        #darken-overlay {
+            background-color: black;
+            z-index: 2;
+            /* Added transition for the smooth fade effect */
+            transition: opacity 0.2s linear;
+        }
+        
+        #gradient-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%);
+            z-index: 2;
+            pointer-events: none; /* Make sure it doesn't block clicks */
+        }
+
+        /* NEW STYLE: Cover for Spline logo */
+        .logo-cover {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            width: 140px;
+            height: 45px;
+            background-color: rgba(0, 0, 0, 0.7); /* Darker, less transparent background */
+            backdrop-filter: blur(20px); /* Increased blur for denser effect */
+            -webkit-backdrop-filter: blur(20px); /* For Safari compatibility */
+            border-radius: 12px; /* Soften edges */
+            border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border for glass effect */
+            z-index: 99; /* Ensure it's above the Spline model */
+            pointer-events: none; /* Make sure it doesn't block interaction with the Spline model */
+        }
+
+        /* Styles for Academic Journey */
+        .academic-card {
+            position: relative;
+            background-color: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out, background-color 0.3s ease-out, border-radius 0.3s ease-out;
+        }
+        .card-video {
+            transition: opacity 0.5s ease-in-out;
+            filter: grayscale(100%);
+        }
+        .card-content {
+            transition: opacity 0.5s ease-in-out;
+        }
+        .card-container::-webkit-scrollbar {
+            display: none;
+        }
+        .slider-container {
+            perspective: 1000px; 
+        }
+        .card-container {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+            -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+            mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+        }
+
+        /* Gemini Modal Styles */
+        #gemini-modal-body::-webkit-scrollbar {
+            width: 6px;
+        }
+        #gemini-modal-body::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+        }
+        #gemini-modal-body::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 3px;
+        }
+        #gemini-modal-body::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.5);
+        }
+
+        /* === NEW ANIMATION STYLES ADDED HERE === */
+        /* Project/Research Image Hover Effect */
+        .project-card-inner, .research-card-inner {
+            overflow: hidden; /* Ensure the scaled image doesn't overflow its container */
+        }
+        .project-card-inner img, .research-card-inner img {
+            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smooth transition for the zoom */
+        }
+        .project-card-inner:hover img, .research-card-inner:hover img {
+            transform: scale(1.05); /* Enlarge the image slightly on hover */
+        }
+
+        /* Glowing Button Effect */
+        .generate-details-btn, .summarize-research-btn, #contact form button {
+            transition: box-shadow 0.3s ease-in-out, transform 0.2s ease;
+        }
+        .generate-details-btn:hover, .summarize-research-btn:hover, #contact form button:hover {
+            transform: translateY(-2px); /* Add a slight lift effect */
+            box-shadow: 0 0 8px 2px rgba(255, 255, 255, 0.2), 
+                        0 0 20px 5px rgba(255, 255, 255, 0.1);
+        }
+
+    </style>
+</head>
+<body class="antialiased bg-black">
+
+    <nav class="fixed top-0 w-full z-50 sm:px-8 lg:px-12 p-6 text-white opacity-0 pointer-events-none transition-opacity duration-500 ease-in-out">
+        <div class="flex items-center justify-between">
+            <a href="#" class="flex items-center gap-2 text-sm">
+                <span class="text-xl font-medium tracking-tight font-playfair">Priyanshu Adhikary</span>
+            </a>
+            <a href="#contact" class="flex items-center gap-2 text-sm hover:opacity-70 transition-opacity">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4"><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"></path><rect x="2" y="4" width="20" height="16" rx="2"></rect></svg>
+                <span class="font-medium font-geist">Contact</span>
+            </a>
+        </div>
+    </nav>
+
+    <aside class="fixed left-6 sm:left-8 lg:left-12 top-1/2 -translate-y-1/2 z-40 hidden md:block">
+        <nav class="space-y-3 text-sm leading-6 text-white">
+            <a href="#" class="nav-link block hover:opacity-80 transition-all duration-300 font-medium font-geist border-l-2 hover:border-white/30 pl-4 -ml-4 border-white opacity-100" data-section-id="hero">Intro</a>
+            <a href="#about" class="nav-link block hover:opacity-80 transition-all duration-300 font-medium font-geist border-l-2 hover:border-white/30 pl-4 -ml-4 border-transparent opacity-70" data-section-id="about">About</a>
+            <a href="#about-me-hero" class="nav-link block hover:opacity-80 transition-all duration-300 font-medium font-geist border-l-2 hover:border-white/30 pl-4 -ml-4 border-transparent opacity-70" data-section-id="about-me-hero">Who I Am</a>
+            <a href="#projects" class="nav-link block hover:opacity-80 transition-all duration-300 font-medium font-geist border-l-2 hover:border-white/30 pl-4 -ml-4 border-transparent opacity-70" data-section-id="projects">Projects</a>
+            <a href="#research" class="nav-link block hover:opacity-80 transition-all duration-300 font-medium font-geist border-l-2 hover:border-white/30 pl-4 -ml-4 border-transparent opacity-70" data-section-id="research">Research</a>
+            <a href="#skills" class="nav-link block hover:opacity-80 transition-all duration-300 font-medium font-geist border-l-2 hover:border-white/30 pl-4 -ml-4 border-transparent opacity-70" data-section-id="skills">Skills</a>
+            <a href="#contact" class="nav-link block hover:opacity-80 transition-all duration-300 font-medium font-geist border-l-2 hover:border-white/30 pl-4 -ml-4 border-transparent opacity-70" data-section-id="contact">Contact</a>
+        </nav>
+    </aside>
+
+    <aside class="fixed right-6 sm:right-8 lg:right-12 top-1/2 -translate-y-12 z-40 hidden md:block">
+        <div class="flex items-center justify-end mb-8">
+            <div class="mr-3 h-px w-10 bg-neutral-400/60"></div>
+            <div id="section-number" class="text-sm font-medium font-geist text-white">01</div>
+        </div>
+        <div class="flex flex-col items-end gap-4 text-white">
+            <a href="https://www.linkedin.com/in/priyanshu-adhikary-4448a028a" target="_blank" class="p-2 rounded-full hover:bg-white/10 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect width="4" height="12" x="2" y="9"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+            </a>
+            <a href="#" class="p-2 rounded-full hover:bg-white/10 transition-colors"> <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6.1 0-1.3-.5-2.4-1.3-3.2.1-.3.5-1.5-.1-3.2 0 0-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1c-.6 1.7-.2 2.9-.1 3.2-.8.8-1.3 1.9-1.3 3.2 0 4.6 2.7 5.8 5.5 6.1-.6.5-.9 1.2-.9 2.2v3.5"></path></svg>
+            </a>
+        </div>
+    </aside>
+
+    <main class="relative">
+        
+        <div class="relative h-[200vh]">
+            <section id="hero" class="w-full h-screen sticky top-0 flex justify-center items-center p-4 md:p-8 overflow-hidden section">
+                <div class="absolute inset-0 flex justify-center items-center text-center z-0">
+                    <h1 class="text-7xl md:text-[13vw] lg:text-[16vw] font-extrabold gradient-text leading-none uppercase">
+                        <span class="block animate-text-focus-in delay-1">Priyanshu</span>
+                        <span class="block animate-text-focus-in delay-2">Adhikary</span>
+                    </h1>
+                </div>
+                <div id="spline-container" class="absolute bottom-[-90px] md:bottom-[-100px] left-1/2 -translate-x-1/2 w-[910px] h-[910px] md:w-[1170px] md:h-[1170px] z-10">
+                    <spline-viewer loading-anim-type="spinner" url="https://prod.spline.design/ZBW-kCPryNbh3gzJ/scene.splinecode" events-target="global"></spline-viewer>
+                    <div class="logo-cover"></div> </div>
+                <div id="spotlight" class="spotlight fixed top-0 left-0 w-96 h-96"></div>
+            </section>
+
+            <section id="about" class="absolute top-[100vh] left-0 w-full h-screen flex items-center justify-center z-20 section">
+                <div class="w-full flex flex-col md:flex-row h-full">
+                    <div id="about-left-panel" class="relative w-full md:w-1/2 p-12 flex items-center justify-center bg-zinc-900/50 backdrop-blur-lg overflow-hidden">
+                        <canvas id="matter-canvas-left"></canvas>
+                        <div class="text-center relative z-10">
+                            <h2 class="text-5xl md:text-6xl font-bold text-white leading-tight">
+                                About <span class="gradient-text">Me</span>
+                            </h2>
+                        </div>
+                    </div>
+                    <div id="about-right-panel" class="w-full md:w-1/2 p-12 flex flex-col items-start justify-center bg-black/80 backdrop-blur-lg">
+                        <div class="hidden-vibe-container">
+                             <div class="hidden-vibe" style="top: 15%; left: 60%;">[initiate: core_modules]</div><div class="hidden-vibe" style="top: 20%; left: 80%;">status: OK</div><div class="hidden-vibe" style="top: 30%; left: 55%;">compiling shaders...</div><div class="hidden-vibe" style="top: 35%; left: 75%;">[auth_success]</div><div class="hidden-vibe" style="top: 45%; left: 65%;">loading assets: 100%</div><div class="hidden-vibe" style="top: 60%; left: 70%;">render_pass: active</div><div class="hidden-vibe" style="top: 65%; left: 50%;">particle_sys: nominal</div><div class="hidden-vibe" style="top: 85%; left: 60%;">[connection: secure]</div>
+                             <div class="fake-switch hidden-vibe" style="top: 18%; left: 10%;"><span class="label">ML Core</span><div class="switch-track switch-on"><div class="switch-handle"></div></div></div><div class="fake-switch hidden-vibe" style="top: 40%; left: 20%;"><span class="label">GPU Boost</span><div class="switch-track switch-on"><div class="switch-handle"></div></div></div><div class="fake-switch hidden-vibe" style="top: 70%; left: 15%;"><span class="label">Debug Mode</span><div class="switch-track switch-off"><div class="switch-handle"></div></div></div><div class="fake-switch hidden-vibe" style="top: 88%; left: 25%;"><span class="label">Async</span><div class="switch-track switch-on"><div class="switch-handle"></div></div></div>
+                        </div>
+                        <p class="text-slate-300 text-lg md:text-xl leading-relaxed relative z-10">
+                            Driven computer science professional with robust programming skills in C++, Java, and Python, coupled with practical experience in machine learning frameworks. Eager to contribute to innovative projects in AI/ML and software development.
+                        </p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div class="relative z-30">
+            <section id="about-me-hero" class="section h-screen flex items-center px-6 sm:px-8 lg:px-12 text-white about-me-hero-bg sticky top-0" style="background-image: url('bg.png');">
+                <div class="absolute inset-0" id="darken-overlay" style="opacity: 0;"></div>
+                <div id="gradient-overlay"></div>
+                <div class="w-full max-w-7xl mx-auto about-me-hero-content" id="about-me-hero-content">
+                    <div class="col-span-12 md:col-span-10 md:col-start-2">
+                        <div class="fade-in-up max-w-2xl" id="about-me-text-container">
+                            <h2 class="text-[48px] sm:text-[64px] md:text-[80px] font-light tracking-tighter font-playfair mb-6">Priyanshu Adhikary</h2>
+                            <h3 class="text-3xl md:text-4xl font-light tracking-tight font-playfair mb-8">AI/ML Engineer & Software Developer</h3>
+                            <p class="text-xl text-neutral-300/90 font-geist leading-relaxed max-w-lg">
+                                I thrive on transforming complex challenges into elegant solutions through code and intelligent systems. With a passion for AI/ML and a solid foundation in software development, I craft intuitive experiences and robust applications that push the boundaries of what's possible.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="relative z-10 bg-transparent">
+
+                <section id="academic-journey" class="section min-h-screen w-full flex flex-col items-center justify-center py-20 text-white">
+                    <header class="w-full max-w-7xl mb-8 text-center">
+                        <h1 class="text-4xl md:text-5xl font-bold text-white mb-2">My Academic Journey</h1>
+                        <p class="text-lg text-gray-300">A timeline of my educational background.</p>
+                    </header>
+                    <div class="relative w-full max-w-7xl slider-container">
+                        <div id="card-container" class="card-container flex overflow-x-auto space-x-6 p-4 py-28">
+                            <div class="academic-card flex-shrink-0 w-[400px] h-[225px] rounded-2xl overflow-hidden">
+                                <video class="card-video absolute top-0 left-0 w-full h-full object-cover opacity-0 pointer-events-none" loop muted playsinline>
+                                    <source src="CU.mp4" type="video/mp4">
+                                </video>
+                                <div class="card-content w-full h-full p-5 flex flex-col justify-center text-center">
+                                    <h3 class="text-2xl font-semibold text-white mb-2">M.E. in Computer Science & Engineering</h3>
+                                    <p class="text-gray-300 mb-1">Chandigarh University, Punjab</p>
+                                    <p class="text-gray-400 text-sm mb-4">(2024-2026)</p>
+                                    <div class="bg-white/10 p-3 rounded-lg">
+                                        <span class="text-gray-300 text-sm">Current CGPA: <strong class="text-white">7.26/10</strong></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="academic-card flex-shrink-0 w-[400px] h-[225px] rounded-2xl overflow-hidden">
+                                 <video class="card-video absolute top-0 left-0 w-full h-full object-cover opacity-0 pointer-events-none" loop muted playsinline>
+                                    <source src="CU1.mp4" type="video/mp4">
+                                </video>
+                                <div class="card-content w-full h-full p-5 flex flex-col justify-center text-center">
+                                    <h3 class="text-2xl font-semibold text-white mb-2">B.E. in Computer Science & Engineering</h3>
+                                    <p class="text-gray-300 mb-1">Chandigarh University, Punjab</p>
+                                    <p class="text-gray-400 text-sm mb-4">(2020-2024)</p>
+                                    <div class="bg-white/10 p-3 rounded-lg">
+                                        <span class="text-gray-300 text-sm">Attained CGPA: <strong class="text-white">7.5/10</strong></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="academic-card flex-shrink-0 w-[400px] h-[225px] rounded-2xl overflow-hidden">
+                                <video class="card-video absolute top-0 left-0 w-full h-full object-cover opacity-0 pointer-events-none" loop muted playsinline>
+                                    <source src="School2.mp4" type="video/mp4">
+                                </video>
+                                <div class="card-content w-full h-full p-5 flex flex-col justify-center text-center">
+                                    <h3 class="text-2xl font-semibold text-white mb-2">Senior Secondary Education (Science)</h3>
+                                    <p class="text-gray-300 mb-1">The Assembly of God Church School, Purulia</p>
+                                    <p class="text-gray-400 text-sm mb-4">(2018-2020)</p>
+                                     <div class="bg-white/10 p-3 rounded-lg">
+                                        <span class="text-gray-300 text-sm">CBSE Board Percentage: <strong class="text-white">90%</strong></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="academic-card flex-shrink-0 w-[400px] h-[225px] rounded-2xl overflow-hidden">
+                                <video class="card-video absolute top-0 left-0 w-full h-full object-cover opacity-0 pointer-events-none" loop muted playsinline>
+                                    <source src="School.mp4" type="video/mp4">
+                                </video>
+                                <div class="card-content w-full h-full p-5 flex flex-col justify-center text-center">
+                                    <h3 class="text-2xl font-semibold text-white mb-2">Matriculation</h3>
+                                    <p class="text-gray-300 mb-1">St.Xavier's School, Purulia</p>
+                                    <p class="text-gray-400 text-sm mb-4">(2010-2018)</p>
+                                      <div class="bg-white/10 p-3 rounded-lg">
+                                        <span class="text-gray-300 text-sm">ICSE Board Percentage: <strong class="text-white">84%</strong></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="projects" class="section min-h-screen px-6 sm:px-8 lg:px-12 py-20 text-white">
+                    <div class="w-full max-w-7xl mx-auto">
+                        <div class="grid grid-cols-12 gap-6 glass-morphism-section border-neutral-800 border rounded-3xl pt-24 pb-24">
+                            <div class="col-span-12 md:col-span-10 md:col-start-2">
+                                <div class="fade-in-up mb-16">
+                                    <h2 class="text-[44px] sm:text-[56px] md:text-[74px] font-light tracking-tighter font-playfair mb-6">Selected Projects</h2>
+                                    <p class="text-lg text-neutral-300/90 font-geist max-w-2xl">A curated collection of projects showcasing my approach to solving complex engineering challenges.</p>
+                                </div>
+                                <div class="space-y-24">
+                                    <div class="fade-in-up grid grid-cols-12 gap-8 items-center">
+                                        <div class="col-span-12 lg:col-span-6 order-2 lg:order-1">
+                                            <div class="space-y-6">
+                                                <div class="text-sm uppercase tracking-wide text-neutral-400 font-geist">IoT / C++ / Python</div>
+                                                <h3 class="text-3xl font-light font-playfair">Secure IoT Device Management</h3>
+                                                <p class="text-neutral-300/80 leading-relaxed font-geist">Built a secure IoT management system using C++ for embedded programming and Python for server-side logic. Analyzed 10,000+ data packets to identify and fix key security flaws.</p>
+                                                <div class="flex flex-wrap gap-2"><span class="px-3 py-1 bg-neutral-800/50 border border-neutral-700 rounded-full text-xs font-geist">C++</span><span class="px-3 py-1 bg-neutral-800/50 border border-neutral-700 rounded-full text-xs font-geist">Python</span><span class="px-3 py-1 bg-neutral-800/50 border border-neutral-700 rounded-full text-xs font-geist">Wireshark</span></div>
+                                                <div class="mt-4">
+                                                    <button class="generate-details-btn group relative inline-flex items-center justify-center text-white rounded-lg p-[1px] text-sm" data-title="Secure IoT Device Management" data-summary="Built a secure IoT management system using C++ for embedded programming and Python for server-side logic. Analyzed 10,000+ data packets to identify and fix key security flaws.">
+                                                        <span class="flex items-center justify-center gap-2 w-full h-full transition-colors duration-300 group-hover:bg-neutral-800/60 font-medium bg-neutral-900/50 rounded-lg py-2 px-4">
+                                                            <i class="fa-solid fa-wand-magic-sparkles"></i> AI Insights
+                                                        </span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-span-12 lg:col-span-6 order-1 lg:order-2">
+                                            <div class="aspect-[4/3] flex project-card-inner border-neutral-800/50 border rounded-lg items-center justify-center">
+                                                <img src="Project 1 iot-device-management.png" alt="Secure IoT Device Management" class="w-full h-full object-contain">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="fade-in-up stagger-delay-1 grid grid-cols-12 gap-8 items-center">
+                                        <div class="col-span-12 lg:col-span-6">
+                                            <div class="aspect-[4/3] flex project-card-inner border-neutral-800/50 border rounded-lg items-center justify-center">
+                                                <img src="Traffic Flow Prediction Dashboard.png" alt="Traffic Flow Prediction Dashboard" class="w-full h-full object-contain">
+                                            </div>
+                                        </div>
+                                        <div class="col-span-12 lg:col-span-6">
+                                            <div class="space-y-6">
+                                                <div class="text-sm uppercase tracking-wide text-neutral-400 font-geist">Data Science / ML</div>
+                                                <h3 class="text-3xl font-light font-playfair">Traffic Flow Prediction Dashboard</h3>
+                                                <p class="text-neutral-300/80 leading-relaxed font-geist">Processed 5+ GB of raw traffic data to develop an interactive dashboard using Pandas and Matplotlib that reduced analysis time by 25%.</p>
+                                                <div class="flex flex-wrap gap-2"><span class="px-3 py-1 bg-neutral-800/50 border border-neutral-700 rounded-full text-xs font-geist">Pandas</span><span class="px-3 py-1 bg-neutral-800/50 border border-neutral-700 rounded-full text-xs font-geist">Matplotlib</span><span class="px-3 py-1 bg-neutral-800/50 border border-neutral-700 rounded-full text-xs font-geist">Data Visualization</span></div>
+                                                <div class="mt-4">
+                                                    <button class="generate-details-btn group relative inline-flex items-center justify-center text-white rounded-lg p-[1px] text-sm" data-title="Traffic Flow Prediction Dashboard" data-summary="Processed 5+ GB of raw traffic data to develop an interactive dashboard using Pandas and Matplotlib that reduced analysis time by 25%.">
+                                                        <span class="flex items-center justify-center gap-2 w-full h-full transition-colors duration-300 group-hover:bg-neutral-800/60 font-medium bg-neutral-900/50 rounded-lg py-2 px-4">
+                                                            <i class="fa-solid fa-wand-magic-sparkles"></i> AI Insights
+                                                        </span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                     <div class="fade-in-up stagger-delay-2 grid grid-cols-12 gap-8 items-center">
+                                        <div class="col-span-12 lg:col-span-6 order-2 lg:order-1">
+                                            <div class="space-y-6">
+                                                <div class="text-sm uppercase tracking-wide text-neutral-400 font-geist">Deep Learning / TensorFlow</div>
+                                                <h3 class="text-3xl font-light font-playfair">Deep Learning Model Deployment</h3>
+                                                <p class="text-neutral-300/80 leading-relaxed font-geist">Achieved 92% accuracy on a dataset of over 9,000 images, reducing training time by 40% using a GTX 1650 GPU and improving inference speed by 35% through model quantization.</p>
+                                                <div class="flex flex-wrap gap-2"><span class="px-3 py-1 bg-neutral-800/50 border border-neutral-700 rounded-full text-xs font-geist">TensorFlow</span><span class="px-3 py-1 bg-neutral-800/50 border border-neutral-700 rounded-full text-xs font-geist">PyTorch</span><span class="px-3 py-1 bg-neutral-800/50 border border-neutral-700 rounded-full text-xs font-geist">Model Quantization</span></div>
+                                                <div class="mt-4">
+                                                    <button class="generate-details-btn group relative inline-flex items-center justify-center text-white rounded-lg p-[1px] text-sm" data-title="Deep Learning Model Deployment" data-summary="Achieved 92% accuracy on a dataset of over 9,000 images, reducing training time by 40% using a GTX 1650 GPU and improving inference speed by 35% through model quantization.">
+                                                        <span class="flex items-center justify-center gap-2 w-full h-full transition-colors duration-300 group-hover:bg-neutral-800/60 font-medium bg-neutral-900/50 rounded-lg py-2 px-4">
+                                                            <i class="fa-solid fa-wand-magic-sparkles"></i> AI Insights
+                                                        </span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-span-12 lg:col-span-6 order-1 lg:order-2">
+                                            <div class="aspect-[4/3] flex project-card-inner border-neutral-800/50 border rounded-lg items-center justify-center">
+                                                <img src="Deep Learning Model Deployment.png" alt="Deep Learning Model Deployment" class="w-full h-full object-contain">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+        
+                <section id="research" class="section min-h-screen px-6 sm:px-8 lg:px-12 py-20 text-white">
+                    <div class="w-full max-w-7xl mx-auto">
+                        <div class="grid grid-cols-12 gap-6 glass-morphism-section border-neutral-800 border rounded-3xl pt-24 pb-24 relative overflow-hidden">
+                            
+                            <div class="absolute inset-0 z-0 opacity-60" style="transform: scale(1.4);">
+                                 <spline-viewer url="https://prod.spline.design/E7q0Ob-622mB53a8/scene.splinecode" events-target="global" background="transparent"></spline-viewer>
+                                 <div class="logo-cover"></div>
+                            </div>
+                            
+                            <div class="relative z-10 col-span-12 md:col-span-10 md:col-start-2">
+                                <div class="fade-in-up mb-16 text-center">
+                                    <h2 class="text-[44px] sm:text-[56px] md:text-[74px] font-light tracking-tighter font-playfair mb-6">Research & Publications</h2>
+                                    <p class="text-lg text-neutral-300/90 font-geist max-w-2xl mx-auto">My formal research contributions to the field of computer science and artificial intelligence.</p>
+                                </div>
+    
+                                <div class="fade-in-up" style="margin-top: calc(16rem + 6cm);">
+                                    <div class="grid grid-cols-12 gap-8 items-center">
+                                        <div class="col-span-12 lg:col-span-6">
+                                            <div class="aspect-[4/3] flex research-card-inner border-neutral-800/50 border rounded-lg items-center justify-center">
+                                                <img src="Research Paper.png" alt="AI-Powered Autonomous Drone Surveillance" class="w-full h-full object-contain">
+                                            </div>
+                                        </div>
+                                        <div class="col-span-12 lg:col-span-6">
+                                            <div class="space-y-6">
+                                                <div class="text-sm uppercase tracking-wide text-neutral-400 font-geist">AI / Surveillance / IEEE Conference</div>
+                                                <h3 class="text-3xl font-light font-playfair">AI-Powered Autonomous Drone Surveillance</h3>
+                                                <p class="text-neutral-300/80 leading-relaxed font-geist">Developed an AI-driven drone surveillance system integrating YOLO and CNN for real-time anomaly detection. Accepted for presentation at ICCCNT 2025.</p>
+                                                <div class="flex flex-wrap gap-2"><span class="px-3 py-1 bg-neutral-800/50 border border-neutral-700 rounded-full text-xs font-geist">Computer Vision</span><span class="px-3 py-1 bg-neutral-800/50 border border-neutral-700 rounded-full text-xs font-geist">YOLO</span><span class="px-3 py-1 bg-neutral-800/50 border border-neutral-700 rounded-full text-xs font-geist">CNN</span></div>
+                                                <div class="mt-4">
+                                                    <button class="summarize-research-btn group relative inline-flex items-center justify-center text-white rounded-lg p-[1px] text-sm" data-title="AI-Powered Autonomous Drone Surveillance for Dynamic Real-Time Anomaly Detection and Monitoring" data-summary="Developed an AI-driven drone surveillance system integrating YOLO and CNN for real-time anomaly detection. Accepted for presentation at ICCCNT 2025. Optimized multi-sensor data processing for edge deployment.">
+                                                        <span class="flex items-center justify-center gap-2 w-full h-full transition-colors duration-300 group-hover:bg-neutral-800/60 font-medium bg-neutral-900/50 rounded-lg py-2 px-4">
+                                                            <i class="fa-solid fa-wand-magic-sparkles"></i> AI Summary
+                                                        </span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="skills" class="section min-h-screen sm:px-8 lg:px-12 pt-20 pb-20 pl-6 pr-6 space-y-12 text-white">
+    <div class="w-full max-w-7xl mr-auto ml-auto space-y-20">
+        
+        <div class="fade-in-up grid grid-cols-12 gap-6 glass-morphism-section border-neutral-800 border rounded-3xl pt-24 pb-24 relative overflow-hidden">
+            
+            <div class="absolute inset-0 z-0">
+                <img src="my photo.png" alt="Background image of Priyanshu Adhikary" class="w-full h-full object-cover blur-sm">
+                <div class="absolute inset-0 bg-black/70"></div>
+            </div>
+
+            <div class="col-span-12 md:col-span-10 md:col-start-2 relative z-10">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                    <div class="">
+                        <h2 class="text-[44px] sm:text-[56px] md:text-[64px] font-light tracking-tighter font-playfair mb-8">WHY Me ?</h2>
+                        <div class="space-y-6 text-neutral-300/90 leading-relaxed font-geist">
+                            <p>I am a Computer Science professional pursuing my M.E. at Chandigarh University. My expertise lies in building robust software solutions and leveraging machine learning to solve complex problems. I am proficient in C++, Java, and Python, with hands-on experience in frameworks like TensorFlow and PyTorch.</p>
+                            <p>I am passionate about contributing to innovative projects and continuously expanding my knowledge in AI, cloud computing, and cybersecurity.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <section class="fade-in-up stagger-delay-1 relative z-10">
+            <div class="max-w-7xl glass-morphism-section border-neutral-800 border rounded-3xl mr-auto ml-auto p-12 sm:p-24">
+                <div class="mb-8">
+                    <h2 class="text-[44px] sm:text-[56px] md:text-[64px] font-light tracking-tighter font-playfair mb-8">Skills & Expertise</h2>
+                </div>
+                <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    <div class="relative rounded-3xl skill-card p-6 ring-1 ring-white/10 hover:bg-neutral-900/80 hover:ring-white/20 transition-all duration-300">
+                        <h3 class="mb-2 text-lg font-semibold tracking-tight font-geist">Languages</h3>
+                        <p class="text-sm text-neutral-400 font-geist">C++, Java, Python, English, Hindi, Bengali.</p>
+                    </div>
+                    <div class="relative rounded-3xl skill-card p-6 ring-1 ring-white/10 hover:bg-neutral-900/80 hover:ring-white/20 transition-all duration-300">
+                        <h3 class="mb-2 text-lg font-semibold tracking-tight font-geist">AI / ML</h3>
+                        <p class="text-sm text-neutral-400 font-geist">NumPy, TensorFlow, PyTorch, Pandas, Matplotlib, scikit-learn, NLTK, OpenCV.</p>
+                    </div>
+                    <div class="relative rounded-3xl skill-card p-6 ring-1 ring-white/10 hover:bg-neutral-900/80 hover:ring-white/20 transition-all duration-300">
+                        <h3 class="mb-2 text-lg font-semibold tracking-tight font-geist">Frameworks</h3>
+                        <p class="text-sm text-neutral-400 font-geist">Django, Pyramid, FastAPI.</p>
+                    </div>
+                    <div class="relative rounded-3xl skill-card p-6 ring-1 ring-white/10 hover:bg-neutral-900/80 hover:ring-white/20 transition-all duration-300">
+                        <h3 class="mb-2 text-lg font-semibold tracking-tight font-geist">Tools & DevOps</h3>
+                        <p class="text-sm text-neutral-400 font-geist">Docker, Kubernetes, Git, MySQL, Pytest.</p>
+                    </div>
+                    <div class="relative rounded-3xl skill-card p-6 ring-1 ring-white/10 hover:bg-neutral-900/80 hover:ring-white/20 transition-all duration-300">
+                        <h3 class="mb-2 text-lg font-semibold tracking-tight font-geist">Cybersecurity</h3>
+                        <p class="text-sm text-neutral-400 font-geist">Nmap, Wireshark, Burp Suite.</p>
+                    </div>
+                    <div class="relative rounded-3xl skill-card p-6 ring-1 ring-white/10 hover:bg-neutral-900/80 hover:ring-white/20 transition-all duration-300">
+                        <h3 class="mb-2 text-lg font-semibold tracking-tight font-geist">Hardware & IoT</h3>
+                        <p class="text-sm text-neutral-400 font-geist">Arduino, IoT.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+    </div>
+</section>
+        
+                <section id="contact" class="section min-h-screen sm:px-8 lg:px-12 p-6 pt-20 pb-20 text-white">
+                    <div class="w-full max-w-7xl mx-auto">
+                        <div class="fade-in-up grid grid-cols-12 gap-6 glass-morphism-section border-neutral-800 border rounded-3xl pt-20 pb-20">
+                            <div class="col-span-12 md:col-span-10 md:col-start-2">
+                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
+                                    <div class="">
+                                        <h2 class="text-[44px] sm:text-[56px] md:text-[64px] font-light tracking-tighter font-playfair mb-8">Let's Connect</h2>
+                                        <div class="space-y-6 text-neutral-300/90 leading-relaxed font-geist">
+                                            <p>I'm always excited to take on new challenges and collaborate. Whether you have a project in mind or just want to chat, I'd love to hear from you.</p>
+                                            <div class="space-y-4">
+                                                <div class="flex items-center gap-4"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-neutral-400"><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"></path><rect x="2" y="4" width="20" height="16" rx="2"></rect></svg><span class="font-geist">tadhikary.prl@gmail.com</span></div>
+                                                <div class="flex items-center gap-4"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-neutral-400"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg><span class="font-geist">Chandigarh, Punjab</span></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="fade-in-up stagger-delay-1 space-y-8">
+                                        <form class="space-y-6" action="https://api.web3forms.com/submit" method="POST">
+
+    <input type="hidden" name="access_key" value="ee181a0a-3d78-4e7d-aef1-4321ce8d751f">
+    <input type="hidden" name="subject" value="New Contact Form Submission from Portfolio">
+    <input type="checkbox" name="botcheck" class="hidden" style="display: none;">
+
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div>
+            <label class="block text-sm font-medium font-geist mb-2">Name</label>
+            <input type="text" name="name" required class="w-full px-4 py-3 form-input-bg rounded-lg focus:outline-none focus:ring-2 focus:ring-white/20 text-white font-geist" placeholder="Your name">
+        </div>
+        <div>
+            <label class="block text-sm font-medium font-geist mb-2">Email</label>
+            <input type="email" name="email" required class="w-full px-4 py-3 form-input-bg rounded-lg focus:outline-none focus:ring-2 focus:ring-white/20 text-white font-geist" placeholder="your@email.com">
+        </div>
+    </div>
+    <div>
+        <label class="block text-sm font-medium font-geist mb-2">Message</label>
+        <textarea name="message" required rows="5" class="w-full px-4 py-3 form-input-bg rounded-lg focus:outline-none focus:ring-2 focus:ring-white/20 text-white font-geist resize-none" placeholder="Tell me about your project..."></textarea>
+    </div>
+    <button type="submit" class="group relative inline-flex items-center justify-center text-white rounded-lg p-[1px]" style="background-image: linear-gradient(144deg,rgba(255,255,255,0.3), rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.2));">
+        <span class="flex items-center justify-center gap-2 text-sm w-full h-full transition-colors duration-300 group-hover:bg-black/50 font-medium bg-black/80 rounded-lg py-3 px-6">Send Message</span>
+    </button>
+</form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <div id="gemini-modal" class="fixed inset-0 bg-black/70 backdrop-blur-md z-[100] hidden items-center justify-center p-4">
+            <div id="gemini-modal-content" class="bg-neutral-900/80 border border-neutral-700 rounded-2xl w-full max-w-2xl max-h-[80vh] flex flex-col shadow-2xl">
+                <div class="flex items-center justify-between p-4 border-b border-neutral-700 flex-shrink-0">
+                    <h3 id="gemini-modal-title" class="text-xl font-playfair text-white"></h3>
+                    <button id="gemini-modal-close" class="text-neutral-400 hover:text-white transition-colors text-3xl leading-none font-bold">&times;</button>
+                </div>
+                <div id="gemini-modal-body" class="p-6 overflow-y-auto text-neutral-300 font-geist leading-relaxed">
+                    <div id="gemini-loading" class="flex items-center justify-center h-32">
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+                    </div>
+                    <div id="gemini-output"></div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-black/50 border-neutral-800/50 border-t p-6 backdrop-blur text-white">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div class="text-sm text-neutral-400 font-geist">© 2025 Priyanshu Adhikary. All rights reserved.</div>
+            <div class="flex items-center gap-6"><a href="#" class="text-sm text-neutral-400 hover:text-white transition-colors font-geist">Privacy Policy</a><a href="#" class="text-sm text-neutral-400 hover:text-white transition-colors font-geist">Terms of Service</a></div>
+        </div>
+    </footer>
+
+
+    <script>
+        // --- Combined Script Logic ---
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- Original Script Logic (Hero & About Intro) ---
+            const spotlight = document.getElementById('spotlight');
+            document.addEventListener('mousemove', (e) => {
+                if (spotlight) {
+                    const x = e.clientX;
+                    const y = e.clientY;
+                    spotlight.style.left = `${x - spotlight.offsetWidth / 2}px`;
+                    spotlight.style.top = `${y - spotlight.offsetHeight / 2}px`;
+                }
+            });
+
+            let matterAnimationInitialized = false;
+            function setupFallingLetters() {
+                if (matterAnimationInitialized) return;
+                matterAnimationInitialized = true;
+                
+                const leftPanel = document.getElementById('about-left-panel');
+                if (!leftPanel) return;
+                const canvas = document.getElementById('matter-canvas-left');
+                const ctx = canvas.getContext('2d');
+                
+                const Engine = Matter.Engine, World = Matter.World, Bodies = Matter.Bodies;
+                const engine = Engine.create({ enableSleeping: true });
+                engine.world.gravity.y = 0.3;
+                
+                let ground, leftWall, rightWall;
+                const fallingObjects = [];
+                const letters = ['A', 'B', 'O', 'U', 'T', 'M', 'E'];
+
+                function resizeCanvas() {
+                    canvas.width = leftPanel.offsetWidth; canvas.height = leftPanel.offsetHeight;
+                    if(ground) World.remove(engine.world, [ground, leftWall, rightWall]);
+                    ground = Bodies.rectangle(canvas.width / 2, canvas.height + 50, canvas.width, 100, { isStatic: true });
+                    leftWall = Bodies.rectangle(-50, canvas.height / 2, 100, canvas.height, { isStatic: true });
+                    rightWall = Bodies.rectangle(canvas.width + 50, canvas.height / 2, 100, canvas.height, { isStatic: true });
+                    World.add(engine.world, [ground, leftWall, rightWall]);
+                }
+                resizeCanvas();
+                window.addEventListener('resize', resizeCanvas);
+
+                function createFallingLetter() {
+                    if (fallingObjects.length > 25) return;
+                    const x = Math.random() * canvas.width;
+                    const text = letters[Math.floor(Math.random() * letters.length)];
+                    const fontSize = Math.random() * 40 + 60;
+                    const body = Bodies.rectangle(x, -100, text.length * fontSize * 0.5, fontSize, { frictionAir: 0.02, restitution: 0.4, angle: (Math.random() - 0.5) * 0.5 });
+                    body.text = text; body.fontSize = fontSize; body.color = `rgba(200, 200, 220, ${Math.random() * 0.2 + 0.05})`;
+                    World.add(engine.world, body); fallingObjects.push(body);
+                }
+
+                function render() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    fallingObjects.forEach((body, index) => {
+                        if (body.position.y > canvas.height + 100) { World.remove(engine.world, body); fallingObjects.splice(index, 1); return; }
+                        ctx.save();
+                        ctx.translate(body.position.x, body.position.y); ctx.rotate(body.angle);
+                        ctx.font = `800 ${body.fontSize}px 'Inter', sans-serif`; ctx.fillStyle = body.color;
+                        ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.shadowColor = body.color; ctx.shadowBlur = 15;
+                        ctx.fillText(body.text, 0, 0); ctx.restore();
+                    });
+                }
+                function animate() { Engine.update(engine, 1000 / 60); render(); requestAnimationFrame(animate); }
+                setInterval(createFallingLetter, 1000); animate();
+            }
+
+            const rightPanel = document.getElementById('about-right-panel');
+            if (rightPanel) {
+                rightPanel.addEventListener('mousemove', (e) => {
+                    const rect = rightPanel.getBoundingClientRect();
+                    const x = e.clientX - rect.left; const y = e.clientY - rect.top;
+                    rightPanel.style.setProperty('--x', `${x}px`); rightPanel.style.setProperty('--y', `${y}px`);
+                });
+                rightPanel.addEventListener('mouseleave', () => {
+                    rightPanel.style.setProperty('--x', `-1000px`); rightPanel.style.setProperty('--y', `-1000px`);
+                });
+            }
+
+            const aboutSection = document.getElementById('about');
+            if (aboutSection) {
+                const aboutObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) { entry.target.classList.add('start-animation'); setupFallingLetters(); } 
+                        else { entry.target.classList.remove('start-animation'); }
+                    });
+                }, { threshold: 0.2 });
+                aboutObserver.observe(aboutSection);
+            }
+
+            // --- New Script Logic (Scroll Animations & Nav) ---
+            const animatedElements = document.querySelectorAll('.fade-in-up, .fade-in');
+            const newContentObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) { entry.target.classList.add('visible'); }
+                });
+            }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+            animatedElements.forEach(el => newContentObserver.observe(el));
+            
+            // --- Intersection Observer for the sticky hero fade-in ---
+            const aboutMeHero = document.getElementById('about-me-hero');
+            if(aboutMeHero) {
+                const heroObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('is-visible');
+                        } else {
+                             entry.target.classList.remove('is-visible');
+                        }
+                    });
+                }, { threshold: 0.2 });
+                heroObserver.observe(aboutMeHero);
+            }
+
+            const sections = document.querySelectorAll('.section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sectionNumber = document.getElementById('section-number');
+            const topNav = document.querySelector('nav');
+            const sectionIdToNumber = {'hero': 1, 'about': 2, 'about-me-hero': 3, 'projects': 4, 'research': 5, 'skills': 6, 'contact': 7};
+
+            function handleScroll() {
+                // Nav visibility logic
+                if (window.scrollY > window.innerHeight * 0.9) {
+                    topNav.classList.remove('opacity-0', 'pointer-events-none');
+                } else {
+                    topNav.classList.add('opacity-0', 'pointer-events-none');
+                }
+
+                // --- MODIFIED SECTION: Text fade and background darken logic ---
+                const aboutMeHero = document.getElementById('about-me-hero');
+                const aboutMeHeroContent = document.getElementById('about-me-hero-content');
+                const academicJourneySection = document.getElementById('academic-journey');
+                const darkenOverlay = document.getElementById('darken-overlay');
+
+                if (aboutMeHero && aboutMeHeroContent && academicJourneySection && darkenOverlay) {
+                    const academicJourneyRect = academicJourneySection.getBoundingClientRect();
+                    const viewportHeight = window.innerHeight;
+                    
+                    // --- Text Fade Logic ---
+                    // Start fading when the academic journey section is at the bottom of the viewport
+                    const textFadeStart = viewportHeight;
+                    // Finish fading when the academic journey section has scrolled 30% into the viewport
+                    const textFadeEnd = viewportHeight * 0.7;
+                    let textProgress = 0;
+                    if (academicJourneyRect.top < textFadeStart) {
+                        textProgress = (textFadeStart - academicJourneyRect.top) / (textFadeStart - textFadeEnd);
+                    }
+                    textProgress = Math.max(0, Math.min(textProgress, 1));
+                    aboutMeHeroContent.style.opacity = 1 - textProgress;
+
+                    // --- NEW Continuous Background Darken Logic ---
+                    // This logic makes the background fade slowly over the entire scroll length of the page
+                    const effectStartScrollY = aboutMeHero.offsetTop;
+                    const totalScrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
+                    const effectDuration = totalScrollableHeight - effectStartScrollY;
+                    const maxOpacity = 0.85; // Set max opacity to 85% so it's not completely black
+
+                    let darkenProgress = 0;
+                    // Start fading only after we scroll past the start of the hero section
+                    if (window.scrollY > effectStartScrollY && effectDuration > 0) {
+                        // Calculate progress based on how far we've scrolled through the rest of the page
+                        darkenProgress = (window.scrollY - effectStartScrollY) / effectDuration;
+                    }
+                    
+                    // Clamp progress between 0 and 1 to avoid errors
+                    darkenProgress = Math.max(0, Math.min(darkenProgress, 1)); 
+                    
+                    // Apply the calculated opacity
+                    darkenOverlay.style.opacity = darkenProgress * maxOpacity;
+                }
+
+                // Section highlighting logic
+                let currentSectionId = '';
+                sections.forEach(section => {
+                    const rect = section.getBoundingClientRect();
+                    if (rect.top <= window.innerHeight / 3 && rect.bottom >= window.innerHeight / 3) {
+                        currentSectionId = section.id;
+                    }
+                });
+
+                if (currentSectionId) {
+                    navLinks.forEach(link => {
+                        link.classList.toggle('border-white', link.dataset.sectionId === currentSectionId);
+                        link.classList.toggle('opacity-100', link.dataset.sectionId === currentSectionId);
+                        link.classList.toggle('border-transparent', link.dataset.sectionId !== currentSectionId);
+                        link.classList.toggle('opacity-70', link.dataset.sectionId !== currentSectionId);
+                    });
+                    if (sectionNumber && sectionIdToNumber[currentSectionId]) {
+                        sectionNumber.textContent = String(sectionIdToNumber[currentSectionId]).padStart(2, '0');
+                    }
+                }
+            }
+            
+            window.addEventListener('scroll', handleScroll);
+            handleScroll(); // Initial check
+
+            // --- Academic Journey Slider Logic ---
+            const scrollContainer = document.getElementById('card-container');
+            if (scrollContainer) {
+                const sliderContainer = document.querySelector('.slider-container');
+                const cards = Array.from(scrollContainer.children);
+                const cardCount = cards.length;
+                if (cardCount > 0) {
+                    const clonesNeeded = Math.ceil(scrollContainer.offsetWidth / (cards[0].offsetWidth * cardCount)) + 2;
+                    for (let i = 0; i < clonesNeeded; i++) {
+                        cards.forEach(card => {
+                            const clone = card.cloneNode(true);
+                            clone.setAttribute('aria-hidden', 'true');
+                            scrollContainer.appendChild(clone);
+                        });
+                    }
+                }
+
+                let isHoveringContainer = false;
+                let hoveredCard = null;
+                const allCards = scrollContainer.querySelectorAll('.academic-card');
+
+                sliderContainer.addEventListener('mouseenter', () => { isHoveringContainer = true; });
+                sliderContainer.addEventListener('mouseleave', () => {
+                    isHoveringContainer = false;
+                    hoveredCard = null;
+                });
+                
+                allCards.forEach(card => {
+                    card.addEventListener('mouseenter', () => { hoveredCard = card; });
+                    card.addEventListener('mouseleave', () => {
+                        if (hoveredCard === card) { hoveredCard = null; }
+                    });
+                });
+
+                function animateAcademicSlider() {
+                    const containerRect = scrollContainer.getBoundingClientRect();
+                    const containerCenter = containerRect.left + containerRect.width / 2;
+
+                    let centerMostCard = null;
+                    let minDistance = Infinity;
+
+                    allCards.forEach(card => {
+                        const cardRect = card.getBoundingClientRect();
+                        const cardCenter = cardRect.left + cardRect.width / 2;
+                        const distance = Math.abs(cardCenter - containerCenter);
+                        if (distance < minDistance) {
+                            minDistance = distance;
+                            centerMostCard = card;
+                        }
+                    });
+
+                    const shouldPause = isHoveringContainer && hoveredCard === centerMostCard;
+
+                    if (!shouldPause) {
+                        scrollContainer.scrollLeft += 0.5;
+                        const originalWidth = cardCount * (allCards[0].offsetWidth + 24); 
+                        if (scrollContainer.scrollLeft >= originalWidth) {
+                            scrollContainer.scrollLeft = 0;
+                        }
+                    }
+
+                    allCards.forEach(card => {
+                        const video = card.querySelector('.card-video');
+                        const content = card.querySelector('.card-content');
+
+                        if (shouldPause && card === centerMostCard) {
+                            card.style.transform = 'scale(1.5)';
+                            card.style.opacity = '1';
+                            card.style.zIndex = '10';
+                            card.style.backgroundColor = '#161b25';
+                            card.style.borderRadius = '0.5rem'; /* Make it rectangular on hover */
+                            if (content) content.style.opacity = '0';
+                            if (video && video.paused) {
+                                video.style.opacity = '1';
+                                video.play().catch(e => {
+                                    if (e.name !== 'AbortError') {
+                                        console.error("Video play failed", e)
+                                    }
+                                });
+                            }
+                        } else {
+                            const cardRect = card.getBoundingClientRect();
+                            const cardCenter = cardRect.left + cardRect.width / 2;
+                            const distanceFromCenter = cardCenter - containerCenter;
+
+                            const maxScale = 1.0;
+                            const minScale = 0.8;
+                            const scaleRange = maxScale - minScale;
+                            const scaleZone = containerRect.width / 2;
+                            const scaleFactor = Math.abs(distanceFromCenter) / scaleZone;
+                            let scale = maxScale - scaleFactor * scaleRange;
+                            scale = Math.max(minScale, Math.min(maxScale, scale));
+
+                            const fadeZone = containerRect.width / 2.5;
+                            let opacity = 1 - (Math.abs(distanceFromCenter) / fadeZone);
+                            opacity = Math.max(0.3, Math.min(1, opacity));
+
+                            card.style.transform = `scale(${scale})`;
+                            card.style.opacity = opacity;
+                            card.style.zIndex = '1';
+                            card.style.backgroundColor = '';
+                            card.style.borderRadius = ''; /* Reset to original shape */
+                            
+                            if (content) content.style.opacity = '1';
+                            if (video && !video.paused) {
+                                video.style.opacity = '0';
+                                video.pause();
+                                video.currentTime = 0;
+                            }
+                        }
+                    });
+                    
+                    requestAnimationFrame(animateAcademicSlider);
+                }
+                animateAcademicSlider();
+            }
+        });
+    </script>
+    <script>
+        // --- Gemini API Integration ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const geminiModal = document.getElementById('gemini-modal');
+            const geminiModalTitle = document.getElementById('gemini-modal-title');
+            const geminiLoading = document.getElementById('gemini-loading');
+            const geminiOutput = document.getElementById('gemini-output');
+            const geminiModalClose = document.getElementById('gemini-modal-close');
+
+            function openModal(title) {
+                geminiModalTitle.textContent = title;
+                geminiOutput.innerHTML = '';
+                geminiLoading.style.display = 'flex';
+                geminiModal.classList.remove('hidden');
+                geminiModal.classList.add('flex');
+            }
+
+            function closeModal() {
+                geminiModal.classList.add('hidden');
+                geminiModal.classList.remove('flex');
+            }
+
+            geminiModalClose.addEventListener('click', closeModal);
+            geminiModal.addEventListener('click', (e) => {
+                if (e.target === geminiModal) {
+                    closeModal();
+                }
+            });
+
+            async function callGemini(prompt) {
+    try {
+        // 🎯 Make sure this URL is exactly '/api/gemini'
+        const response = await fetch('/api/gemini', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ prompt: prompt }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        const candidate = result.candidates?.[0];
+
+        if (candidate && candidate.content?.parts?.[0]?.text) {
+            return candidate.content.parts[0].text;
+        } else {
+            return 'The AI returned an empty response. Please try a different prompt.';
+        }
+
+    } catch (error) {
+        console.error('Error:', error);
+        return `Sorry, something went wrong. Please try again later. Error: ${error.message}`;
+    }
+}
+
+
+            // Event listeners for project buttons
+            document.querySelectorAll('.generate-details-btn').forEach(button => {
+                button.addEventListener('click', async () => {
+                    const title = button.dataset.title;
+                    const summary = button.dataset.summary;
+
+                    openModal(`AI Insights for: ${title}`);
+
+                    const prompt = `You are an expert technical writer for a portfolio website. Based on the following project title and summary, generate a more detailed, in-depth paragraph (around 150-200 words) explaining the technical challenges, methodologies used, key achievements, and the overall impact of the project. Make it sound professional and impressive. Do not use markdown.
+
+                    Project Title: "${title}"
+                    Project Summary: "${summary}"`;
+
+                    const responseText = await callGemini(prompt);
+                    geminiLoading.style.display = 'none';
+                    geminiOutput.innerHTML = responseText.replace(/\n/g, '<br>'); // Simple formatting
+                });
+            });
+
+            // Event listener for research button
+            document.querySelectorAll('.summarize-research-btn').forEach(button => {
+                button.addEventListener('click', async () => {
+                    const title = button.dataset.title;
+                    const summary = button.dataset.summary;
+
+                    openModal(`AI Summary for: ${title}`);
+
+                    const prompt = `You are a research assistant tasked with simplifying complex topics for a general audience on a portfolio website. Summarize the following research paper abstract in three key bullet points. Each bullet point should be a concise sentence. Explain its significance in an easy-to-understand way. Do not use markdown, use "*" for bullet points.
+
+                    Research Title: "${title}"
+                    Abstract: "${summary}"`;
+
+                    const responseText = await callGemini(prompt);
+                    geminiLoading.style.display = 'none';
+                    geminiOutput.innerHTML = responseText.replace(/\*/g, '&bull;').replace(/\n/g, '<br><br>&bull; ');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
