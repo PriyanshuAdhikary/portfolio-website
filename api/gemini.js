@@ -1,7 +1,7 @@
 const axios = require('axios');
 
-// This is the main function Vercel will run
-export default async function handler(req, res) {
+// This is the corrected CommonJS export that Vercel requires
+module.exports = async (req, res) => {
     // Check if the API key is available
     if (!process.env.GOOGLE_API_KEY) {
         console.error('SERVER ERROR: GOOGLE_API_KEY is not configured.');
@@ -35,4 +35,4 @@ export default async function handler(req, res) {
         }
         res.status(500).json({ error: errorMessage });
     }
-}
+};
